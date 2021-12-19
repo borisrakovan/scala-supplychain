@@ -1,15 +1,16 @@
 package cz.cvut.fel.omo.foodchain.common
 
 import cz.cvut.fel.omo.foodchain.blockchain.Node
+import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 
 trait Transferable
 
-class Message[N <: Node](
-    val sender: N,
-    val recipient: N,
+class Message(
+    val sender: Node,
+    val recipient: Node,
     val content: Transferable,
   )
 
-trait MessageQueue[N <: Node] {
-  def collectMessages(): Map[N, List[Message[N]]]
+trait MessageQueue {
+  def collectMessages(): Map[Node, List[Message]]
 }

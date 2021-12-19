@@ -2,57 +2,100 @@ package cz.cvut.fel.omo.foodchain.foodchain
 
 import cz.cvut.fel.omo.foodchain.blockchain._
 import cz.cvut.fel.omo.foodchain.common.{ Message, MessageQueue, Transferable }
-import scala.collection.mutable.ListBuffer
-import cz.cvut.fel.omo.foodchain.foodchain.channels.ChannelRequest
-import cz.cvut.fel.omo.foodchain.foodchain.channels.FoodMaterialRequest
-import cz.cvut.fel.omo.foodchain.foodchain.channels.PaymentRequest
+import cz.cvut.fel.omo.foodchain.foodchain.channels._
 import cz.cvut.fel.omo.foodchain.foodchain.transactions._
-import cz.cvut.fel.omo.foodchain.foodchain.channels.Channel
+import cz.cvut.fel.utils.IdGenerator
+import cz.cvut.fel.omo.foodchain.foodchain.operations._
+import scala.collection.mutable.ListBuffer
+
+object PartyIdGenerator extends IdGenerator {}
+
+object FoodChainParty {
+  val FoodChain: List[String] =
+    List(
+      // "farmer","importer", "regulator", "distributor", "supplier", "retailer", "customer",
+      "farmer",
+      "regulator",
+      "distributor",
+      "customer",
+    )
+
+  def getPreviousParty(forType: String): Option[String] = {
+    if (!FoodChain.contains(forType))
+      throw new RuntimeException(s"Unknown party type: $forType")
+    if (forType != FoodChain(0))
+      Some(FoodChain(FoodChain.indexOf(forType) - 1))
+    else None
+  }
+}
 
 abstract class FoodChainParty(
-    val id: String,
-    val network: Network[FoodChainParty],
+    val ofType: String,
+    // type of the previous party in the chain
+    val network: Network,
     val channels: List[Channel],
     initialMaterials: List[FoodMaterial],
     val initialBalance: Double,
+    capacity: Int = Int.MaxValue,
   ) extends Node {
-  override val transactionValidationStrategy = new FoodChainValidationStrategy
-  val pricingStrategy = new DefaultPricingStrategy
-  @SuppressWarnings(Array("org.wartremover.warts.Var"))
-  override def broadcastBlock(block: Block): Unit = network.broadcast(block, this)
-  override def broadcastTransaction(
-      tx: Transaction[Node, UtxoContent, Operation[UtxoContent]]
-    ): Unit = network.broadcast(tx, this)
+  val id = s"$ofType-${PartyIdGenerator.getNextId()}"
+  val prevPartyType: Option[String] = FoodChainParty.getPreviousParty(forType = ofType)
 
-  // TODO : read https://www.freecodecamp.org/news/how-to-build-a-simple-actor-based-blockchain-aac1e996c177/
-  var currentTick: Int = 0
-  val foodMaterials: ListBuffer[FoodMaterial] = ListBuffer.empty[FoodMaterial] ++ initialMaterials
+  override val transactionValidationStrategy = new FoodChainValidationStrategy
+  private val pricingStrategy: PricingStrategy = new DefaultPricingStrategy
+  private var currentTick: Int = 0
+  protected val foodRepo: FoodRepository = new InMemoryFoodRepository(initialMaterials, capacity)
   var balance: Double = initialBalance
+  val expectedMaterials: ListBuffer[FoodMaterial] = ListBuffer.empty[FoodMaterial]
 
   def handleTransaction(tx: TX): Unit =
     tx.operation match {
       case op: TransferOperation =>
         if (op.to == this) {
-          foodMaterials ++= op.materials
-          ()
+          foodRepo.addMany(op.materials)
+          expectedMaterials --= op.materials
         }
       case op: PaymentOperation =>
         if (op.to == this)
           balance += op.getAmount()
-      case op => throw new RuntimeException(s"Unknown operation ${op.toString()}")
+      case _ =>
     }
 
   def handleChannelRequest(request: ChannelRequest): Unit =
     request match {
-      case req: FoodMaterialRequest =>
-        val myMaterials = foodMaterials.filter(_.name == req.material.name)
-        if (myMaterials.size < req.amount)
-          log("can no longer satisfy incoming request")
-        // TODO: send request back to channel
-        else {
-          val materials = myMaterials.take(req.amount)
-          sellFoodMaterials(materials.toList, to = req.sender)
+      case req: FoodMaterialBuyRequest =>
+        foodRepo.find(req.material) match {
+          case Some(material) =>
+            material.price = pricingStrategy.apply(material)
+            transferFoodMaterials(List(material), to = req.sender)
+            log(s"Requesting payment of ${material.price.toString()} from ${req.sender.id}")
+            request
+              .channel
+              .makeRequest(
+                new PaymentRequest(
+                  request.channel,
+                  sender = this,
+                  amount = material.price,
+                  payer = req.sender,
+                )
+              )
+
+          case None =>
+            throw new RuntimeException(
+              s"can no longer satisfy incoming request ${request.toString()}"
+            )
         }
+      case req: FoodMaterialSellRequest =>
+        if (
+            prevPartyType.isDefined
+            && req.sender.ofType == prevPartyType.get
+            && !foodRepo.capacityReached()
+            && !expectedMaterials.contains(req.material)
+        ) {
+          req.channel.makeRequest(FoodMaterialBuyRequest.asResponseTo(req, buyer = this))
+          expectedMaterials += req.material
+        }
+
       case req: PaymentRequest =>
         if (balance < req.amount)
           throw new RuntimeException(s"Not enough money to pay ${req.amount}")
@@ -64,138 +107,92 @@ abstract class FoodChainParty(
       case _ => throw new RuntimeException(s"Unknown request ${request.toString()}")
     }
 
-  def offerChannelRequest(request: ChannelRequest): Boolean = {
-    log("offered channel request")
+  def offerChannelRequest(request: ChannelRequest): Boolean =
     request match {
-      case req: FoodMaterialRequest =>
-        val myMaterials = foodMaterials.filter(_.name == req.material.name)
-        if (myMaterials.size >= req.amount) {
-          log("yes sir!")
-          true
-        }
-        else {
-          log("not enough materials")
-          false
-        }
+      case req: FoodMaterialSellRequest =>
+        (prevPartyType.isDefined
+          && req.sender.ofType == prevPartyType.get
+          && !foodRepo.capacityReached())
+      case req: FoodMaterialBuyRequest => req.seller == this
       case req: PaymentRequest => req.payer == this
       case _ => throw new RuntimeException(s"Unknown channel request: ${request.toString()}")
     }
-  }
 
-  def act(inbox: List[Message[FoodChainParty]]): Unit = {
+  def act(inbox: List[Message]): Unit = {
     currentTick += 1
 
     inbox.foreach { message =>
       message.content match {
         case tx: TX =>
-          println("tx")
           val _ = receiveTransaction(tx)
           handleTransaction(tx)
 
         case b: Block =>
-          println("block")
           val _ = receiveBlock(b)
 
         case req: ChannelRequest =>
-          println("channel request")
           handleChannelRequest(req)
         case _ =>
           throw new RuntimeException(s"Unknown message content: ${message.content.toString()}")
       }
     }
+
+    val processedMaterials = foodRepo.getInState(FoodMaterialState.Processed)
+    // TODO: do we want to send to all channnels?
+    for {
+      material <- processedMaterials
+      channel <- channels
+    } channel.makeRequest(new FoodMaterialSellRequest(channel, sender = this, material))
   }
 
-  protected def sellFoodMaterials(materials: List[FoodMaterial], to: FoodChainParty): Unit = {
-    materials.foreach(m => m.price = pricingStrategy.apply(m))
-    transferFoodMaterials(materials, to)
-    val totalPrice = materials.map(_.getPrice()).sum
-    requestPayment(totalPrice, from = to)
+  def getFoodMaterials(): List[FoodMaterial] = foodRepo.getAll()
+
+  protected def recordOperation(operation: Operation[UtxoContent]) = {
+    log(s"new operation: ${operation.toString()}")
+    val tx = operation match {
+      case op: PaymentOperation =>
+        new MoneyTransaction[FoodChainParty](
+          op,
+          initiator = this,
+        )
+      case op: FoodOperation =>
+        new FoodTransaction(op, initiator = this)
+
+      case _ => throw new RuntimeException(s"Unknown operation: $operation")
+    }
+
+    // let the transaction owner record his transaction immediately,
+    // other nodes will receive it in the next tick
+    network.broadcast(tx, sender = this)
+    val txValid = receiveTransaction(tx)
+
   }
-  // requestPayment()
+
+  protected def processMaterial(material: FoodMaterial) =
+    foodRepo.updateState(material, FoodMaterialState.Processed)
 
   protected def transferFoodMaterials(materials: List[FoodMaterial], to: FoodChainParty): Unit = {
     log(s"Transferring ${materials.toString()} to ${to.id}")
 
     val transferOperation = new TransferOperation(materials, from = this, to = to)
-    val tx = new FoodTransaction[FoodChainParty](transferOperation, initiator = this)
 
-    broadcastTransaction(tx)
-    foodMaterials --= materials
+    foodRepo.removeMany(materials)
+    recordOperation(transferOperation)
   }
-
-  protected def transferFoodMaterial(material: FoodMaterial, to: FoodChainParty): Unit =
-    transferFoodMaterials(List(material), to)
-
-  protected def requestPayment(amount: Double, from: FoodChainParty): Unit =
-    // TODO: somehow get the appropriate channel and send payment request
-    log(s"Requesting payment of ${amount.toString()} to ${from.id}")
 
   protected def makePayment(amount: Double, to: FoodChainParty): Unit = {
     log(s"Paying ${amount.toString()} to ${to.id}")
-
+    log(getLiveOwnedUtxos().toString())
+    log(getUtxos().toString())
     if (amount > balance)
       // TODO
       throw new RuntimeException(s"Not enough money to pay ${amount.toString()} to ${to.id}")
 
-    val inputUtxos = getNeededMoneyUtxos(amount)
-    val totalInputAmount = inputUtxos.map(_.content.amount).sum
+    val paymentOperation = new PaymentOperation(amount, from = this, to = to)
 
-    val outputUtxos = List(
-      new Utxo(to, new Money(amount)),
-      new Utxo(this, new Money(totalInputAmount - amount)),
-    )
-
-    val paymentOperation = new PaymentOperation(inputUtxos, outputUtxos, from = this, to = to)
-
-    log(paymentOperation.getInputs().toString())
-    val tx = new MoneyTransaction[FoodChainParty](
-      paymentOperation,
-      initiator = this,
-    )
-
-    broadcastTransaction(tx)
     balance -= amount
+    recordOperation(paymentOperation)
   }
 
-  private def getNeededMoneyUtxos(
-      amount: Double
-    ): List[Utxo[Money]] = {
-    val myMoney: List[Utxo[Money]] = getOwnedUtxos().flatMap { utxo =>
-      utxo.content match {
-        case _: Money => Some(utxo.asInstanceOf[Utxo[Money]])
-        case _ => None
-      }
-    }
-    takeWhileLessThan(
-      amount,
-      myMoney,
-      (x: Utxo[Money]) => x.content.amount,
-      List.empty[Utxo[Money]],
-    ) match {
-      case Some(x) => x
-      case None => throw new RuntimeException("Not enough money in utxos")
-    }
-  }
-
-  @annotation.tailrec
-  private def takeWhileLessThan[A](
-      bound: Double,
-      source: List[A],
-      getValue: A => Double,
-      acc: List[A],
-    ): Option[List[A]] =
-    if (bound <= 0)
-      Some(acc)
-    else
-      source.headOption match {
-        case Some(head) =>
-          takeWhileLessThan(bound - getValue(head), source.drop(1), getValue, head :: acc)
-        case None => None
-      }
+  override def toString(): String = id
 }
-// class Producer extends FoodChainParty
-// class Importer extends FoodChainParty
-// class Supplier extends FoodChainParty
-// class Regulator extends FoodChainParty
-// class Retailer extends FoodChainParty
-// class Customer extends FoodChainParty

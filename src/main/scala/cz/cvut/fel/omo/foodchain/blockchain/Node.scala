@@ -1,5 +1,7 @@
 package cz.cvut.fel.omo.foodchain.blockchain
 
+import cz.cvut.fel.omo.foodchain.foodchain.operations.PaymentOperation
+
 object Node {
   val BlockSize: Int = 1
 }
@@ -7,8 +9,9 @@ object Node {
 trait Node {
   val id: String
   val transactionValidationStrategy: TransactionValidationStrategy
+  val network: Network
+
   // a list of unspent transactions in the system, the only necessary minimal state of a node
-  // var utxos: List[Utxo[UtxoContent]] = initialState()
   var blockChain: BlockChain[Node, Operation[UtxoContent]] =
     new BlockChain[Node, Operation[UtxoContent]](List.empty[Block])
 
@@ -20,39 +23,51 @@ trait Node {
 
   // lazy initialization necessary due to mutual reference
   def initializeUtxos(initialUtxos: List[Utxo[UtxoContent]]): Unit = utxos = Some(initialUtxos)
+
   def getUtxos(): List[Utxo[UtxoContent]] = utxos match {
     case Some(value) => value
     case None => throw new RuntimeException(s"Utxos were not initialized for node $id")
   }
-  protected def getOwnedUtxos(): List[Utxo[UtxoContent]] = getUtxos().filter(_.owner == this)
 
-  def broadcastBlock(block: Block): Unit
-  def broadcastTransaction(tx: TX): Unit
+  protected def getLiveUtxos(
+    ): List[Utxo[UtxoContent]] = applyTransactionsOnState(transactionPool) match {
+    case Some(updatedUtxos) => updatedUtxos
+    case None =>
+      throw new RuntimeException("The node's transaction pool is not valid. Shouldn't happen.")
+  }
+
+  def getLiveOwnedUtxos(): List[Utxo[UtxoContent]] =
+    getLiveUtxos().filter(_.owner == this)
 
   def sign(utxo: Utxo[UtxoContent]): String = s"signature_$id"
 
   def receiveTransaction(tx: Transaction[Node, UtxoContent, Operation[UtxoContent]]): Boolean = {
     val updatedTransactionPool = transactionPool :+ tx
 
-    val txValid = updatedTransactionPool
-      .foldLeft[Option[List[Utxo[UtxoContent]]]](Some(getUtxos()))(applyTransaction) match {
+    val txValid = applyTransactionsOnState(updatedTransactionPool) match {
       case Some(_) =>
-        log("received new transaction")
+        log(s"received valid transaction: ${tx.toString()} ${tx.operation.toString()}")
         true
       case None =>
-        log("received invalid transaction")
+        throw new RuntimeException(
+          s"${id}: received invalid transaction: ${tx.toString()} ${tx.operation.toString()}"
+        )
+        // log(s"received invalid transaction: ${tx.toString()}")
         false
     }
 
     if (txValid) {
       transactionPool = updatedTransactionPool
       if (transactionPool.size == Node.BlockSize)
-        if (id == "farmer") {
+        if (id startsWith "farmer") {
           // TODO: implement proof of work
           // for now, the system acts as if the block was always immediately mined by a node with id "farmer"
           val newBlock = new Block(blockChain.history.lastOption, transactionPool, 1)
           log("mined block")
-          broadcastBlock(newBlock)
+
+          network.broadcast(newBlock, this)
+          receiveBlock(newBlock)
+
           transactionPool = List.empty[TX]
         }
     }
@@ -67,32 +82,41 @@ trait Node {
       *   Suppose TX is the block's transaction list with n transactions.
       *   For all i in 0...n-1, set S[i+1] = APPLY(S[i],TX[i]) If any application returns an error, exit and return false.
       *   Return true, and register S[n] as the state at the end of this block.
-      */ {
-      // log(s"received new block. current utxos: $utxos")
-      log(s"received new block")
-      blockChain.append(block) match {
-        case Some(updatedBlockChain) =>
-          block
-            .transactions
-            .foldLeft[Option[List[Utxo[UtxoContent]]]](Some(getUtxos()))(applyTransaction) match {
-            case Some(updatedUtxos) =>
-              // log(s"updatedUtxos: $updatedUtxos")
-              updateState(updatedUtxos, updatedBlockChain, List.empty[TX])
-              true
-            case None =>
-              log(
-                s"Can't append block ${block.toString()} to blockchain. Some of the transasctions are invalid."
+      */
+    blockChain.append(block) match {
+      case Some(updatedBlockChain) =>
+        applyTransactionsOnState(block.transactions) match {
+          case Some(updatedUtxos) =>
+            // log(s"updatedUtxos: $updatedUtxos")
+            val updatedTxPool =
+              transactionPool.filterNot(tx =>
+                updatedBlockChain.history.flatMap(_.transactions).contains(tx)
               )
-              false
-          }
+            println(transactionPool)
+            println("[=]" * 10)
+            println(updatedTxPool)
+            updateState(updatedUtxos, updatedBlockChain, updatedTxPool)
+            true
+          case None =>
+            log(
+              s"Can't append block ${block.toString()} to blockchain. Some of the transasctions are invalid."
+            )
+            false
+        }
 
-        case None =>
-          log(
-            s"Can't append block ${block.toString()} to blockchain. The block is not a valid continuation."
-          )
-          false
-      }
+      case None =>
+        log(
+          s"Can't append block ${block.toString()} to blockchain. The block is not a valid continuation."
+        )
+        false
     }
+
+  private def applyTransactionsOnState(transactions: List[TX]): Option[List[Utxo[UtxoContent]]] = {
+    val initialState = getUtxos()
+    val finalState =
+      transactions.foldLeft[Option[List[Utxo[UtxoContent]]]](Some(initialState))(applyTransaction)
+    finalState
+  }
 
   protected def updateState(
       updatedUtxos: List[Utxo[UtxoContent]],
@@ -100,7 +124,7 @@ trait Node {
       updatedTransactionPool: List[TX],
     ): Unit = {
     // log(s"updatedUtxos: $updatedUtxos")
-    // log("updating state")
+    log("updating state")
     utxos = Some(updatedUtxos)
     blockChain = updatedBlockChain
     transactionPool = updatedTransactionPool
@@ -121,6 +145,12 @@ trait Node {
     // step 2: check that the tx outputs can actually be derived from the tx inputs according
     // to some client-defined validation strategy
     lazy val outputsValid = transactionValidationStrategy.validate(tx)
+    if (!(inputsValid && outputsValid)) {
+      println(inputsValid)
+      println(utxos)
+      println(tx.operation)
+      println(tx.inputs.map(_.utxo))
+    }
     inputsValid && outputsValid
   }
 

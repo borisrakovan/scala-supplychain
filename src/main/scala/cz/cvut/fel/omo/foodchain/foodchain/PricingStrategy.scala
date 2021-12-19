@@ -4,7 +4,8 @@ trait PricingStrategy {
   def apply(product: Tradeable): Double
 }
 
-class DefaultPricingStrategy {
-  def apply(product: Tradeable): Double =
-    product.getPrice() * 1.2
+class DefaultPricingStrategy extends PricingStrategy {
+  def apply(product: Tradeable): Double = round(product.getPrice() * 1.2)
+
+  def round(n: Double): Double = n - (n % 0.01)
 }

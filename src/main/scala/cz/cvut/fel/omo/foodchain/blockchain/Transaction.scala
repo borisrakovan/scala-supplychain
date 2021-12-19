@@ -26,4 +26,6 @@ class Transaction[+N <: Node, +U <: UtxoContent, +O <: Operation[U]](
     val signature = initiator.sign(utxo)
     new TransactionInput(utxo, signature)
   }
+
+  override def toString(): String = this.getClass().getSimpleName()
 }

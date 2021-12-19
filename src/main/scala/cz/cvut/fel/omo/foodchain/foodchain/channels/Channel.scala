@@ -1,14 +1,12 @@
 package cz.cvut.fel.omo.foodchain.foodchain.channels
 
 import scala.collection.mutable
-import cz.cvut.fel.omo.foodchain.common.{ MessageQueue, Transferable, Message }
 import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 import scala.util.Random
+import cz.cvut.fel.omo.foodchain.common.{ MessageQueue, Message }
+import cz.cvut.fel.omo.foodchain.blockchain.Node
 
-abstract class ChannelRequest(val channel: Channel, val sender: FoodChainParty)
-    extends Transferable {}
-
-abstract class Channel extends MessageQueue[FoodChainParty] {
+class Channel(val name: String) extends MessageQueue {
   @SuppressWarnings(Array("org.wartremover.warts.Var"))
   var participants: List[FoodChainParty] = List.empty[FoodChainParty]
 
@@ -22,7 +20,7 @@ abstract class Channel extends MessageQueue[FoodChainParty] {
   @SuppressWarnings(Array("org.wartremover.warts.MutableDataStructures"))
   private val pendingRequests = mutable.Queue[ChannelRequest]()
 
-  def collectMessages(): Map[FoodChainParty, List[Message[FoodChainParty]]] = {
+  def collectMessages(): Map[Node, List[Message]] = {
     // println(messageQueue)
     val messages = requestQueue.toList
     requestQueue.clear()
@@ -49,6 +47,7 @@ abstract class Channel extends MessageQueue[FoodChainParty] {
       case Some(rec) => val _ = requestQueue.enqueue((request, rec))
       case None => val _ = pendingRequests.enqueue(request)
     }
+    println(s"request: ${request.toString()} accepted by ${acceptedBy.get.id}")
   }
 
   def registerParty(party: FoodChainParty): Unit =

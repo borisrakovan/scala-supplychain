@@ -10,5 +10,5 @@ class Block(
   val timestamp: Long = System.currentTimeMillis
   def hash(): String = ""
 
-  override def toString: String = hash()
+  override def toString: String = s"Block(${hash()})"
 }

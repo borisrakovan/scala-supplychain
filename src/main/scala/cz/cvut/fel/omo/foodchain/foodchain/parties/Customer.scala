@@ -6,20 +6,12 @@ import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterial
 import cz.cvut.fel.omo.foodchain.common.Message
 import cz.cvut.fel.omo.foodchain.foodchain.channels.Channel
 
-class Regulator(
+class Customer(
     network: Network,
     channels: List[Channel],
     foodMaterials: List[FoodMaterial],
     initialBalance: Double,
-    capacity: Int,
-  ) extends FoodChainParty(
-      "regulator",
-      network,
-      channels,
-      foodMaterials,
-      initialBalance,
-      capacity,
-    ) {
+  ) extends FoodChainParty("customer", network, channels, foodMaterials, initialBalance) {
   override def act(inbox: List[Message]): Unit =
     super.act(inbox)
 }

@@ -4,21 +4,31 @@ import cz.cvut.fel.omo.foodchain.blockchain.Network
 import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterial
 import cz.cvut.fel.omo.foodchain.common.Message
-import cz.cvut.fel.omo.foodchain.blockchain.Block
 import cz.cvut.fel.omo.foodchain.foodchain.channels.Channel
+import cz.cvut.fel.omo.foodchain.foodchain.operations.HarvestOperation
+import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterialState
 
 class Farmer(
-    network: Network[FoodChainParty],
+    network: Network,
     channels: List[Channel],
     foodMaterials: List[FoodMaterial],
     initialBalance: Double,
+    harvestLimit: Int = 2,
   ) extends FoodChainParty("farmer", network, channels, foodMaterials, initialBalance) {
-  override def act(inbox: List[Message[FoodChainParty]]): Unit = {
+  override def act(inbox: List[Message]): Unit = {
+
     super.act(inbox)
-    if (currentTick == 1) {
-      val distributor = network.getById("distributor")
-      makePayment(100, distributor)
-      transferFoodMaterial(foodMaterials(0), distributor)
+    val waitingMaterials = foodRepo.getInState(FoodMaterialState.Waiting)
+    val materialsToProcess = waitingMaterials.slice(0, harvestLimit)
+
+    if (materialsToProcess.length > 0) {
+      val op = new HarvestOperation(
+        materialsToProcess,
+        party = this,
+      )
+
+      materialsToProcess.foreach(processMaterial(_))
+      recordOperation(op)
     }
   }
 }

@@ -5,9 +5,8 @@ import cz.cvut.fel.omo.foodchain.foodchain.transactions._
 
 class FoodChainValidationStrategy extends TransactionValidationStrategy {
   private def validateFoodMaterialTransaction(
-      tx: FoodTransaction[Node]
+      tx: FoodTransaction
     ): Boolean = {
-    println("validating food material")
     val inputContents = tx.inputs.map(_.utxo.content.id)
     tx.outputs
       .find { utxo =>
@@ -19,10 +18,10 @@ class FoodChainValidationStrategy extends TransactionValidationStrategy {
   private def validateMoneyTransaction(
       tx: MoneyTransaction[Node]
     ): Boolean = {
-    println("validating money transaction")
-    val a = tx.inputs.map(_.utxo.content.amount)
-    println(a)
-    true
+    val inputAmount = tx.inputs.map(_.utxo.content.amount).sum
+    val outputAmount = tx.outputs.map(_.content.amount).sum
+
+    return outputAmount <= inputAmount
   }
 
   override def validate(
@@ -31,19 +30,11 @@ class FoodChainValidationStrategy extends TransactionValidationStrategy {
     tx match {
       case tx: MoneyTransaction[Node] =>
         validateMoneyTransaction(tx)
-      case tx: FoodTransaction[Node] =>
+      case tx: FoodTransaction =>
         validateFoodMaterialTransaction(tx)
       // case tx: Transaction[Node, FoodMaterial, Operation[FoodMaterial]] =>
       //   validateFoodMaterialTransaction(tx)
       case _ => throw new RuntimeException("Received unsupported type of UtxoContent")
 
     }
-  // tx.outputs match {
-  //   case head :: _ =>
-  //     head.content match {
-  //       case c: FoodMaterial => validateFoodMaterialTransaction(tx)
-  //       case c: Money => validateMoneyTransaction(tx)
-  //     }
-  //   case Nil => true
-  // }
 }

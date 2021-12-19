@@ -9,23 +9,38 @@ import cz.cvut.fel.omo.foodchain.foodchain.channels._
 class EcosystemSimulation {
   @SuppressWarnings(Array("org.wartremover.warts.Var"))
   var currentTick: Int = 0
-  val network: Network[FoodChainParty] = new Network
+  val network: NetworkImpl = new NetworkImpl
 
   private val foodMaterials1: List[FoodMaterial] =
-    List[FoodMaterial](new Apple(12.04), new Pear(11.4), new Melon(10.2))
+    List[FoodMaterial](
+      new FoodMaterial("Apple", 12.04),
+      new FoodMaterial("Pear", 11.4),
+      new FoodMaterial("Melon", 10.2),
+    )
   private val foodMaterials2: List[FoodMaterial] =
-    List[FoodMaterial](new Strawberry(10.26), new Strawberry(2.2))
+    List[FoodMaterial](new FoodMaterial("Strawberry", 10.26), new FoodMaterial("Strawberry", 2.2))
   private val foodMaterials3: List[FoodMaterial] =
-    List[FoodMaterial](new Banana(12.50), new Apple(9.99))
+    List[FoodMaterial](new FoodMaterial("Banana", 12.50), new FoodMaterial("Apple", 9.99))
 
-  private val channel1: PaymentChannel = new PaymentChannel()
-  private val channel2: FoodChannel = new MeatChannel()
+  private val channel1 = new Channel("general")
 
-  private val allChannels: List[Channel] = List(channel1, channel2)
+  private val allChannels: List[Channel] = List(channel1)
 
-  private val party1 = new Farmer(network, allChannels, foodMaterials1, 1000)
-  private val party2 = new Distributor(network, allChannels, foodMaterials2, 5000)
-  private val party3 = new Regulator(network, allChannels, foodMaterials3, 10000)
+  private val party1 = new Farmer(network, allChannels, foodMaterials1, initialBalance = 1000)
+  private val party3 =
+    new Regulator(network, allChannels, List.empty, initialBalance = 10000, capacity = 2)
+  private val party2 =
+    new Distributor(
+      network,
+      allChannels,
+      List.empty,
+      initialBalance = 5000,
+      capacity = 10,
+      distributionLimit = 2,
+    )
+  private val party4 = new Customer(network, allChannels, List.empty, initialBalance = 10000)
+
+  val allParties = List(party1, party2, party3, party4)
 
   def simulationCycle(): Unit = {
     currentTick += 1
@@ -33,29 +48,30 @@ class EcosystemSimulation {
 
     val allMessages = network.collectMessages()
     val channelMessages = allChannels.map(c => c.collectMessages())
-    network.nodes.foreach { node =>
-      val inbox = allMessages(node) ++ channelMessages.flatMap(ch => ch(node))
-      node.act(inbox)
+
+    allParties.foreach { party =>
+      val inbox = allMessages(party) ++ channelMessages.flatMap(ch => ch(party))
+      party.act(inbox)
     }
 
     println(s"--------------\n")
   }
 
   def run(): Unit = {
-    val parties = List(party1, party2, party3)
+    val parties = List(party1, party2, party3, party4)
     val initialState = parties.flatMap { party =>
-      party.foodMaterials.map(new Utxo[FoodMaterial](party, _)) :+
+      party.getFoodMaterials().map(new Utxo[FoodMaterial](party, _)) :+
         new Utxo[Money](
           party,
           new Money(party.balance),
         )
     }
 
-    List(party1, party2, party3).foreach { node =>
+    allParties.foreach { node =>
       node.initializeUtxos(initialState)
       network.registerNode(node)
       channel1.registerParty(node)
-      channel2.registerParty(node)
+    // channel2.registerParty(node)
     }
     println("Starting simulation")
 
