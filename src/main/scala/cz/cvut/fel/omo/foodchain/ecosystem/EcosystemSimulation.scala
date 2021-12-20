@@ -51,7 +51,7 @@ class EcosystemSimulation {
 
     allParties.foreach { party =>
       val inbox = allMessages(party) ++ channelMessages.flatMap(ch => ch(party))
-      party.act(inbox)
+      party.act(inbox.sortBy(_.timestamp))
     }
 
     println(s"--------------\n")
@@ -78,7 +78,7 @@ class EcosystemSimulation {
     println(party1.getUtxos().map(_.toString()).mkString("\n"))
     // println(party2.getUtxos())
 
-    0 until 10 foreach { _ =>
+    0 until 20 foreach { _ =>
       simulationCycle()
     // Thread.sleep(1000)
     }

@@ -26,9 +26,6 @@ class PaymentOperation(
   private def getNeededMoneyUtxos(
       amount: Double
     ): List[Utxo[Money]] = {
-    println("^" * 10)
-    println(from.getLiveOwnedUtxos())
-    println("^" * 10)
     val myMoney: List[Utxo[Money]] = from.getLiveOwnedUtxos().flatMap { utxo =>
       utxo.content match {
         case _: Money => Some(utxo.asInstanceOf[Utxo[Money]])

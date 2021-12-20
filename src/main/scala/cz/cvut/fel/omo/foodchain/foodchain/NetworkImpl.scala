@@ -18,6 +18,7 @@ class NetworkImpl extends Network with MessageQueue {
   @SuppressWarnings(Array("org.wartremover.warts.MutableDataStructures"))
   private val messageQueue = mutable.Queue[Message]()
 
+  def getParticipants(): List[Node] = nodes.toList
   def collectMessages(): Map[Node, List[Message]] = {
     // println(messageQueue)
     // println(messages)
@@ -34,4 +35,5 @@ class NetworkImpl extends Network with MessageQueue {
 
   def broadcast(msg: Transferable, sender: Node): Unit =
     nodes.filter(_ != sender).foreach(node => messageQueue.enqueue(new Message(sender, node, msg)))
+  // nodes.foreach(node => messageQueue.enqueue(new Message(sender, node, msg)))
 }

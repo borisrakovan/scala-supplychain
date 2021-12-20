@@ -46,3 +46,8 @@ class HarvestOperation(
     materials: List[FoodMaterial],
     party: FoodChainParty,
   ) extends SimpleFoodOperation(materials, party) {}
+
+class InspectionOperation(
+    material: FoodMaterial,
+    party: FoodChainParty,
+  ) extends SimpleFoodOperation(List(material), party) {}

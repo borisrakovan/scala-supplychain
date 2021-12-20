@@ -35,6 +35,5 @@ class FoodChainValidationStrategy extends TransactionValidationStrategy {
       // case tx: Transaction[Node, FoodMaterial, Operation[FoodMaterial]] =>
       //   validateFoodMaterialTransaction(tx)
       case _ => throw new RuntimeException("Received unsupported type of UtxoContent")
-
     }
 }

@@ -3,7 +3,7 @@ package cz.cvut.fel.omo.foodchain.blockchain
 import cz.cvut.fel.omo.foodchain.foodchain.operations.PaymentOperation
 
 object Node {
-  val BlockSize: Int = 1
+  val BlockSize: Int = 2
 }
 
 trait Node {
@@ -41,6 +41,18 @@ trait Node {
 
   def sign(utxo: Utxo[UtxoContent]): String = s"signature_$id"
 
+  def mineBlock() =
+    if (transactionPool.size >= Node.BlockSize)
+      if (id startsWith "farmer") {
+        // TODO: implement proof of work
+        // for now, the system acts as if the block was always immediately mined by a node with id "farmer"
+        val newBlock = new Block(blockChain.history.lastOption, transactionPool, 1)
+        log("mined block")
+
+        network.broadcast(newBlock, this)
+        receiveBlock(newBlock)
+      }
+
   def receiveTransaction(tx: Transaction[Node, UtxoContent, Operation[UtxoContent]]): Boolean = {
     val updatedTransactionPool = transactionPool :+ tx
 
@@ -55,22 +67,8 @@ trait Node {
         // log(s"received invalid transaction: ${tx.toString()}")
         false
     }
-
-    if (txValid) {
+    if (txValid)
       transactionPool = updatedTransactionPool
-      if (transactionPool.size == Node.BlockSize)
-        if (id startsWith "farmer") {
-          // TODO: implement proof of work
-          // for now, the system acts as if the block was always immediately mined by a node with id "farmer"
-          val newBlock = new Block(blockChain.history.lastOption, transactionPool, 1)
-          log("mined block")
-
-          network.broadcast(newBlock, this)
-          receiveBlock(newBlock)
-
-          transactionPool = List.empty[TX]
-        }
-    }
     txValid
   }
 
@@ -92,9 +90,6 @@ trait Node {
               transactionPool.filterNot(tx =>
                 updatedBlockChain.history.flatMap(_.transactions).contains(tx)
               )
-            println(transactionPool)
-            println("[=]" * 10)
-            println(updatedTxPool)
             updateState(updatedUtxos, updatedBlockChain, updatedTxPool)
             true
           case None =>
@@ -145,12 +140,12 @@ trait Node {
     // step 2: check that the tx outputs can actually be derived from the tx inputs according
     // to some client-defined validation strategy
     lazy val outputsValid = transactionValidationStrategy.validate(tx)
-    if (!(inputsValid && outputsValid)) {
-      println(inputsValid)
-      println(utxos)
-      println(tx.operation)
-      println(tx.inputs.map(_.utxo))
-    }
+    // if (!(inputsValid && outputsValid)) {
+    //   println(inputsValid)
+    //   println(utxos)
+    //   println(tx.operation)
+    //   println(tx.inputs.map(_.utxo))
+    // }
     inputsValid && outputsValid
   }
 

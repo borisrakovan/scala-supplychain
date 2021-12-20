@@ -5,6 +5,8 @@ import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterial
 import cz.cvut.fel.omo.foodchain.common.Message
 import cz.cvut.fel.omo.foodchain.foodchain.channels.Channel
+import cz.cvut.fel.omo.foodchain.foodchain.operations.InspectionOperation
+import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterialState
 
 class Regulator(
     network: Network,
@@ -20,6 +22,20 @@ class Regulator(
       initialBalance,
       capacity,
     ) {
-  override def act(inbox: List[Message]): Unit =
+  override def act(inbox: List[Message]): Unit = {
     super.act(inbox)
+
+    val materialToProcess = foodRepo.getInState(FoodMaterialState.Waiting).headOption
+
+    materialToProcess match {
+      case Some(m) =>
+        val op = new InspectionOperation(
+          material = m,
+          party = this,
+        )
+        processMaterial(m)
+        recordOperation(op)
+      case None =>
+    }
+  }
 }

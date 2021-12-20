@@ -121,6 +121,9 @@ abstract class FoodChainParty(
   def act(inbox: List[Message]): Unit = {
     currentTick += 1
 
+    // todo super.act() ?
+    mineBlock()
+
     inbox.foreach { message =>
       message.content match {
         case tx: TX =>
@@ -164,6 +167,10 @@ abstract class FoodChainParty(
     // let the transaction owner record his transaction immediately,
     // other nodes will receive it in the next tick
     network.broadcast(tx, sender = this)
+    // network.getParticipants().foreach { n =>
+    // n.receiveTransaction(tx)
+    // n.asInstanceOf[FoodChainParty].handleTransaction(tx)
+    // }
     val txValid = receiveTransaction(tx)
 
   }
@@ -182,8 +189,6 @@ abstract class FoodChainParty(
 
   protected def makePayment(amount: Double, to: FoodChainParty): Unit = {
     log(s"Paying ${amount.toString()} to ${to.id}")
-    log(getLiveOwnedUtxos().toString())
-    log(getUtxos().toString())
     if (amount > balance)
       // TODO
       throw new RuntimeException(s"Not enough money to pay ${amount.toString()} to ${to.id}")

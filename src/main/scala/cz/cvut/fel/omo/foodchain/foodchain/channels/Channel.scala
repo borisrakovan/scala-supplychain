@@ -47,7 +47,8 @@ class Channel(val name: String) extends MessageQueue {
       case Some(rec) => val _ = requestQueue.enqueue((request, rec))
       case None => val _ = pendingRequests.enqueue(request)
     }
-    println(s"request: ${request.toString()} accepted by ${acceptedBy.get.id}")
+    if (acceptedBy.isDefined)
+      println(s"request: ${request.toString()} accepted by ${acceptedBy.get.id}")
   }
 
   def registerParty(party: FoodChainParty): Unit =
