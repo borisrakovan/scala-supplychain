@@ -186,7 +186,6 @@ abstract class FoodChainParty(
     foodRepo.removeMany(materials)
     recordOperation(transferOperation)
   }
-
   protected def makePayment(amount: Double, to: FoodChainParty): Unit = {
     log(s"Paying ${amount.toString()} to ${to.id}")
     if (amount > balance)
