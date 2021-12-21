@@ -8,7 +8,9 @@ import cz.cvut.fel.omo.foodchain.blockchain.UtxoContent
 import cz.cvut.fel.omo.foodchain.blockchain.Operation
 import cz.cvut.fel.omo.foodchain.blockchain.Network
 
-class NetworkImpl extends Network with MessageQueue {
+trait EcosystemNetwork extends Network with MessageQueue
+
+class EcosystemNetworkImpl extends EcosystemNetwork {
   // TODO: work only with ids, not with actual instances. ids will be loaded from config.
   type TX = Transaction[Node, UtxoContent, Operation[UtxoContent]]
 

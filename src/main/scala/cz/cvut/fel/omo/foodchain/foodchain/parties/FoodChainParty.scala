@@ -121,7 +121,6 @@ abstract class FoodChainParty(
   def act(inbox: List[Message]): Unit = {
     currentTick += 1
 
-    // todo super.act() ?
     mineBlock()
 
     inbox.foreach { message =>
@@ -186,6 +185,7 @@ abstract class FoodChainParty(
     foodRepo.removeMany(materials)
     recordOperation(transferOperation)
   }
+
   protected def makePayment(amount: Double, to: FoodChainParty): Unit = {
     log(s"Paying ${amount.toString()} to ${to.id}")
     if (amount > balance)

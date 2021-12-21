@@ -1,11 +1,5 @@
 package cz.cvut.fel.omo.foodchain.blockchain
 
-import cz.cvut.fel.omo.foodchain.foodchain.operations.PaymentOperation
-
-object Node {
-  val BlockSize: Int = 2
-}
-
 trait Node {
   val id: String
   val transactionValidationStrategy: TransactionValidationStrategy
@@ -41,16 +35,24 @@ trait Node {
 
   def sign(utxo: Utxo[UtxoContent]): String = s"signature_$id"
 
-  def mineBlock() =
-    if (transactionPool.size >= Node.BlockSize)
+  def mineBlock(): Unit =
+    if (transactionPool.size >= BlockChain.BlockSize)
       if (id startsWith "farmer") {
         // TODO: implement proof of work
         // for now, the system acts as if the block was always immediately mined by a node with id "farmer"
-        val newBlock = new Block(blockChain.history.lastOption, transactionPool, 1)
+        val transactions = transactionPool.take(BlockChain.BlockSize)
         log("mined block")
 
-        network.broadcast(newBlock, this)
-        receiveBlock(newBlock)
+        val newBlock = blockChain.appendTransactions(transactions)
+
+        newBlock match {
+          case Some(block) =>
+            network.broadcast(block, this)
+            receiveBlock(block)
+            ()
+          case None =>
+            throw new RuntimeException("Mined invalid block")
+        }
       }
 
   def receiveTransaction(tx: Transaction[Node, UtxoContent, Operation[UtxoContent]]): Boolean = {
