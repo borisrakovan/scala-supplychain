@@ -3,6 +3,7 @@ package cz.cvut.fel.omo.foodchain.foodchain
 import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterial
 import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterialState
 import scala.collection.mutable.{ ListBuffer, Map }
+import cz.cvut.fel.omo.foodchain.utils.Utils
 
 trait FoodRepository {
   val capacity: Int
@@ -11,7 +12,8 @@ trait FoodRepository {
   def find(material: FoodMaterial): Option[FoodMaterial]
   def getAll(): List[FoodMaterial]
   def getInState(state: FoodMaterialState): List[FoodMaterial]
-  def updateState(material: FoodMaterial, newState: FoodMaterialState)
+  def updateState(material: FoodMaterial, newState: FoodMaterialState): Unit
+  def updatePrice(material: FoodMaterial, newPrice: Double): Unit
   def capacityReached(): Boolean = getAll().length >= capacity
 }
 
@@ -44,9 +46,15 @@ class InMemoryFoodRepository(val initialMaterials: List[FoodMaterial], val capac
       case (k, v) if v == state => k
     }.toList
 
-  def updateState(material: FoodMaterial, newState: FoodMaterialState) =
+  def updateState(material: FoodMaterial, newState: FoodMaterialState): Unit =
     find(material) match {
-      case Some(m) => materialStates.put(material, newState)
-      case None => throw new RuntimeException(s"Material ${material.id} not in repo.")
+      case Some(m) => val _ = materialStates.put(m, newState)
+      case None => Utils.assertionFailed(s"Material ${material.id} not in repo.")
+    }
+
+  def updatePrice(material: FoodMaterial, newPrice: Double): Unit =
+    find(material) match {
+      case Some(m) => m.price = newPrice
+      case None => Utils.assertionFailed(s"Material ${material.id} not in repo.")
     }
 }

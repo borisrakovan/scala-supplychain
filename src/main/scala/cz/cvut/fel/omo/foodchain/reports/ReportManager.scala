@@ -1,17 +1,20 @@
 package cz.cvut.fel.omo.foodchain.reports
-import scala.util.{ Try, Success, Failure }
+import cz.cvut.fel.omo.foodchain.ecosystem.Ecosystem
 
 object ReportManager {
   val ReportGenerators: Map[String, ReportGenerator] = Map(
-    "parties" -> PartiesReportGenerator,
-    "materials" -> MaterialsReportGenerator,
-    "security" -> SecurityReportGenerator,
-    "transactions" -> TransactionsReportGenerator,
+    "parties" -> new PartiesReportGenerator(),
+    "materials" -> new MaterialsReportGenerator(),
+    "security" -> new SecurityReportGenerator(),
+    "transactions" -> new TransactionsReportGenerator(),
   )
 }
 
-class ReportManager {
-  def generateReport(): Try[EcosystemReport] = Try {}
-}
+class ReportManager(val ecosystem: Ecosystem) {
+  def getReportTypes(): List[String] = ReportManager.ReportGenerators.keySet.toList
 
-trait ReportGenerator {}
+  def generateReport(reportType: String): Report = {
+    val gen = ReportManager.ReportGenerators(reportType)
+    gen.generate(ecosystem)
+  }
+}

@@ -5,17 +5,18 @@ import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterial
 import cz.cvut.fel.omo.foodchain.common.Message
 import cz.cvut.fel.omo.foodchain.foodchain.channels.Channel
-import cz.cvut.fel.omo.foodchain.foodchain.operations.InspectionOperation
 import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterialState
+import cz.cvut.fel.omo.foodchain.foodchain.operations.ImportOperation
 
-class Regulator(
+class Importer(
     network: Network,
     channels: List[Channel],
     foodMaterials: List[FoodMaterial],
     initialBalance: Double,
     capacity: Int,
+    importLimit: Int,
   ) extends FoodChainParty(
-      "regulator",
+      "importer",
       network,
       channels,
       foodMaterials,
@@ -25,17 +26,17 @@ class Regulator(
   override def act(inbox: List[Message]): Unit = {
     super.act(inbox)
 
-    val materialToProcess = foodRepo.getInState(FoodMaterialState.Waiting).headOption
+    val waitingMaterials = foodRepo.getInState(FoodMaterialState.Waiting)
+    val materialsToProcess = waitingMaterials.slice(0, importLimit)
 
-    materialToProcess match {
-      case Some(m) =>
-        val op = new InspectionOperation(
-          material = m,
-          party = this,
-        )
-        processMaterial(m, op)
-        recordOperation(op)
-      case None =>
+    if (materialsToProcess.length > 0) {
+      val op = new ImportOperation(
+        materialsToProcess,
+        party = this,
+      )
+
+      materialsToProcess.foreach(processMaterial(_, op))
+      recordOperation(op)
     }
   }
 }

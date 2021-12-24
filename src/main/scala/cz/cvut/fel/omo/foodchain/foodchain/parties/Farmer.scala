@@ -27,7 +27,7 @@ class Farmer(
         party = this,
       )
 
-      materialsToProcess.foreach(processMaterial(_))
+      materialsToProcess.foreach(processMaterial(_, op))
       recordOperation(op)
     }
   }

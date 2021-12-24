@@ -1,11 +1,19 @@
 package cz.cvut.fel.omo.foodchain.foodchain
 
+import cz.cvut.fel.omo.foodchain.utils.Utils
+
 trait PricingStrategy {
   def apply(product: Tradeable): Double
 }
 
 class DefaultPricingStrategy extends PricingStrategy {
-  def apply(product: Tradeable): Double = round(product.getPrice() * 1.2)
+  def apply(product: Tradeable): Double = product.getPrice()
+}
 
-  def round(n: Double): Double = n - (n % 0.01)
+class RelativePricingStrategy(val multiplier: Double) extends PricingStrategy {
+  def apply(product: Tradeable): Double = Utils.round2(product.getPrice() * multiplier)
+}
+
+class AbsolutePricingStrategy(val delta: Double) extends PricingStrategy {
+  def apply(product: Tradeable): Double = Utils.round2(product.getPrice() + delta)
 }

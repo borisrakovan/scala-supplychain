@@ -37,7 +37,7 @@ class Distributor(
         distance = Random.between(10, 100),
       )
 
-      materialsToProcess.foreach(processMaterial(_))
+      materialsToProcess.foreach(processMaterial(_, op))
       recordOperation(op)
     }
 

@@ -1,28 +1,28 @@
 package cz.cvut.fel.omo.foodchain.blockchain
 
 import cz.cvut.fel.omo.foodchain.common.Transferable
+import cz.cvut.fel.utils.IdGenerator
 
-class TransactionInput[+N <: Node, +U <: UtxoContent](
+class TransactionInput[+U <: UtxoContent](
     val utxo: Utxo[U],
     val signature: String,
   )
 
-// class MoneyInputs[+N <: Node](
-//     utxo: Utxo[Money],
-//     signature: String,
-//   ) extends TransactionInput[N, Money](utxo, signature)
-// class FoodInputs[+N <: Node](
-//     utxo: Utxo[FoodMaterial],
-//     signature: String,
-//   ) extends TransactionInput[N, FoodMaterial](utxo, signature)
+object Transaction {
+  private val idGen = new IdGenerator
 
-class Transaction[+N <: Node, +U <: UtxoContent, +O <: Operation[U]](
-    val operation: O,
-    val initiator: N,
+  def nextId(): String = idGen.getNextId()
+}
+
+class Transaction[+U <: UtxoContent](
+    val operation: Operation[U],
+    val initiator: Node,
+    val time: Long,
   ) extends Transferable {
-  private val opInputs: List[Utxo[U]] = operation.getInputs()
+  val id = Transaction.nextId()
+
   val outputs: List[Utxo[U]] = operation.getOutputs()
-  val inputs: List[TransactionInput[N, U]] = opInputs.map { utxo =>
+  val inputs: List[TransactionInput[U]] = operation.getInputs().map { utxo =>
     val signature = initiator.sign(utxo)
     new TransactionInput(utxo, signature)
   }

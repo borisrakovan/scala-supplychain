@@ -5,6 +5,8 @@ import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 import scala.util.Random
 import cz.cvut.fel.omo.foodchain.common.{ MessageQueue, Message }
 import cz.cvut.fel.omo.foodchain.blockchain.Node
+import cz.cvut.fel.omo.foodchain.common.Logger
+import cz.cvut.fel.omo.foodchain.utils.Utils
 
 class Channel(val name: String) extends MessageQueue {
   @SuppressWarnings(Array("org.wartremover.warts.Var"))
@@ -21,7 +23,6 @@ class Channel(val name: String) extends MessageQueue {
   private val pendingRequests = mutable.Queue[ChannelRequest]()
 
   def collectMessages(): Map[Node, List[Message]] = {
-    // println(messageQueue)
     val messages = requestQueue.toList
     requestQueue.clear()
     participants.map { p =>
@@ -36,7 +37,7 @@ class Channel(val name: String) extends MessageQueue {
 
   def makeRequest(request: ChannelRequest): Unit = {
     if (!participants.contains(request.sender))
-      throw new RuntimeException("Sender is not a participant in this channel")
+      Utils.assertionFailed("Sender is not a participant in this channel")
     // always suffle the participants in the chain to make sure
     // that everybody has equal chance to respond to the request
     val acceptedBy = Random
@@ -48,7 +49,7 @@ class Channel(val name: String) extends MessageQueue {
       case None => val _ = pendingRequests.enqueue(request)
     }
     if (acceptedBy.isDefined)
-      println(s"request: ${request.toString()} accepted by ${acceptedBy.get.id}")
+      Logger.info(s"request: ${request.toString()} accepted by ${acceptedBy.get.id}")
   }
 
   def registerParty(party: FoodChainParty): Unit =

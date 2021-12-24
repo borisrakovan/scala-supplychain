@@ -4,16 +4,17 @@ import cz.cvut.fel.omo.foodchain.blockchain.Utxo
 import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 import cz.cvut.fel.omo.foodchain.blockchain.Operation
 import cz.cvut.fel.omo.foodchain.foodchain.Money
+import cz.cvut.fel.omo.foodchain.utils.Utils
 
 class PaymentOperation(
     val amount: Double,
     val from: FoodChainParty,
     val to: FoodChainParty,
   ) extends Operation[Money] {
-  val inputs = getNeededMoneyUtxos(amount)
-  val totalInputAmount = inputs.map(_.content.amount).sum
+  private val inputs = getNeededMoneyUtxos(amount)
+  private val totalInputAmount = inputs.map(_.content.amount).sum
 
-  val outputs = List(
+  private val outputs = List(
     new Utxo(owner = to, new Money(amount)),
     new Utxo(owner = from, new Money(totalInputAmount - amount)),
   )
@@ -39,7 +40,9 @@ class PaymentOperation(
       List.empty[Utxo[Money]],
     ) match {
       case Some(x) => x
-      case None => throw new RuntimeException("Not enough money in utxos")
+      case None =>
+        Utils.assertionFailed("Not enough money in utxos")
+        List.empty
     }
   }
 
@@ -59,5 +62,7 @@ class PaymentOperation(
         case None => None
       }
 
-  override def toString(): String = s"${super.toString()}(${from.toString()} -> ${to.toString()})"
+  override def toString(): String =
+    s"Payment(from=${from.toString()}, to=${to
+      .toString()}, amount=${Utils.formatPrice(amount).toString()})"
 }

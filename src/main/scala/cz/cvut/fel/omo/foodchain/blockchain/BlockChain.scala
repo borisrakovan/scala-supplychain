@@ -1,37 +1,39 @@
 package cz.cvut.fel.omo.foodchain.blockchain
 
-object BlockChain {
-  val BlockSize: Int = 2
-}
+import scala.util.Try
+import cz.cvut.fel.omo.foodchain.blockchain.security.AlreadyMinedException
+import cz.cvut.fel.omo.foodchain.blockchain.security.BlockChainException
 
-class BlockChain[N <: Node, O <: Operation[UtxoContent]](val history: List[Block]) {
-  def appendTransactions(transactions: List[Transaction[N, UtxoContent, O]]): Option[Block] = {
-    val newBlock =
-      new Block(history.lastOption.map(_.hash).getOrElse(""), transactions, 1)
+class BlockChain(val history: List[Block]) {
+  def numBlocks(): Int = history.size
 
-    append(newBlock) match {
-      case Some(value) => Some(newBlock)
-      case None => None
-    }
-  }
+  def flatTransactions(): List[Transaction[UtxoContent]] = history.flatMap(_.transactions)
 
-  def append(block: Block): Option[BlockChain[N, O]] = {
-    val newBlockChain = new BlockChain[N, O](history :+ block)
+  def getLastHash(): String = history.lastOption.map(_.hash).getOrElse("")
+
+  def append(block: Block): Try[BlockChain] = Try {
+    val newBlockChain = new BlockChain(history :+ block)
     this.history.lastOption match {
       case Some(lastBlock) =>
+        if (lastBlock.time == block.time)
+          throw new AlreadyMinedException
+
         val hashValid = block.prevBlockHash == lastBlock.hash
         val timestampValid = block.timestamp >= lastBlock.timestamp
 
-        hashValid && timestampValid match {
-          case true => Some(newBlockChain)
-          case false =>
-            println(hashValid, timestampValid)
-            println(block.timestamp)
-            println(lastBlock.timestamp)
-            None
-        }
+        if (!hashValid)
+          throw new BlockChainException(
+            s"Hashes do not match: ${block.prevBlockHash} ${lastBlock.hash}"
+          )
+        if (!timestampValid)
+          throw new BlockChainException(
+            s"Timestamps are not valid: ${block.timestamp} ${lastBlock.timestamp}"
+          )
+        newBlockChain
 
-      case None => Some(newBlockChain)
+      case None => newBlockChain
     }
   }
+
+  override def toString(): String = history.map(_.toString()).mkString(", ")
 }

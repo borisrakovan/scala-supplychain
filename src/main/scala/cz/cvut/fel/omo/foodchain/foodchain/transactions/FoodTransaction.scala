@@ -7,4 +7,5 @@ import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 class FoodTransaction(
     operation: Operation[FoodMaterial],
     initiator: FoodChainParty,
-  ) extends Transaction[FoodChainParty, FoodMaterial, Operation[FoodMaterial]](operation, initiator)
+    time: Long,
+  ) extends Transaction[FoodMaterial](operation, initiator, time)
