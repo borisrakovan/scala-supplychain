@@ -1,10 +1,10 @@
 package cz.cvut.fel.omo.foodchain.ecosystem
 
 import cz.cvut.fel.omo.foodchain.reports.ReportManager
-import cz.cvut.fel.omo.foodchain.ui.UserInterface
-import cz.cvut.fel.omo.foodchain.common.Logger
-import cz.cvut.fel.omo.foodchain.blockchain.BlockChain
+import cz.cvut.fel.omo.foodchain.UserInterface
+import cz.cvut.fel.omo.foodchain.{ Logger, Config }
 import cz.cvut.fel.omo.foodchain.foodchain.{ HostileBehaviour, PartyBehaviour }
+import java.io.PrintWriter
 
 class EcosystemSimulation(val ecosystem: Ecosystem, val userInterface: UserInterface) {
   @SuppressWarnings(Array("org.wartremover.warts.Var"))
@@ -12,8 +12,6 @@ class EcosystemSimulation(val ecosystem: Ecosystem, val userInterface: UserInter
 
   private val reportManager: ReportManager = new ReportManager(ecosystem)
   private val hostileBehaviour: PartyBehaviour = new HostileBehaviour(
-    EcosystemConfig.DoubleSpendPeriodProbability,
-    EcosystemConfig.BlockMutationPeriodProbability,
   )
   def simulationCycle(): Unit = {
     currentTick += 1
@@ -49,23 +47,44 @@ class EcosystemSimulation(val ecosystem: Ecosystem, val userInterface: UserInter
   }
 
   def showSummaryReports(): Unit = {
-    userInterface.showReport(reportManager.generateReport("transactions"))
-    userInterface.showReport(reportManager.generateReport("parties"))
-    userInterface.showReport(reportManager.generateReport("materials"))
-    userInterface.showReport(reportManager.generateReport("security"))
+    val reports = List(
+      reportManager.generateReport("transactions"),
+      reportManager.generateReport("parties"),
+      reportManager.generateReport("materials"),
+      reportManager.generateReport("security"),
+    )
+    reports.foreach(userInterface.showReport(_))
+
+    Config.ReportFile match {
+      case Some(filename) =>
+        val content = reports.map(_.toString()).mkString("\n\n")
+        val w = new PrintWriter(filename)
+        w.write(content)
+        w.close()
+
+      case None =>
+    }
   }
 
   def run(): Unit = {
 
     Logger.log("Starting simulation")
 
-    0 until EcosystemConfig.NumSimulationSteps foreach { i =>
+    0 until Config.NumSimulationSteps foreach { i =>
       simulationCycle()
-    // if ((i + 1) % EcosystemConfig.OfferReportPeriod == 0)
-    //   interactionCycle()
-    // else
-    // Thread.sleep(EcosystemConfig.SimulationStepDuration * 1000)
+      if ((i + 1) % Config.OfferReportPeriod == 0)
+        interactionCycle()
+      else
+        Thread.sleep((Config.SimulationStepDuration * 1000).toLong)
     }
+
+    for (p <- ecosystem.parties)
+      p.blockChain.validate(p) match {
+        case Some(violation) =>
+          for (p2 <- ecosystem.parties)
+            p2.securityLog.report(violation)
+        case None =>
+      }
 
     Logger.info("The simulation has ended")
     showSummaryReports()

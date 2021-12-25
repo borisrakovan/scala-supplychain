@@ -19,7 +19,6 @@ trait FoodRepository {
 
 class InMemoryFoodRepository(val initialMaterials: List[FoodMaterial], val capacity: Int)
     extends FoodRepository {
-  // TODO: move price here as well?
   private val foodMaterials: ListBuffer[FoodMaterial] =
     ListBuffer.empty[FoodMaterial] ++ initialMaterials
   private val materialStates: Map[FoodMaterial, FoodMaterialState] =

@@ -6,8 +6,8 @@ import cz.cvut.fel.omo.foodchain.foodchain.transactions._
 import cz.cvut.fel.utils.IdGenerator
 import cz.cvut.fel.omo.foodchain.foodchain.operations._
 import scala.collection.mutable.ListBuffer
-import cz.cvut.fel.omo.foodchain.common.Logger
-import cz.cvut.fel.omo.foodchain.common.Message
+import cz.cvut.fel.omo.foodchain.Logger
+import cz.cvut.fel.omo.foodchain.foodchain.Message
 import cz.cvut.fel.omo.foodchain.utils.Utils
 import cz.cvut.fel.omo.foodchain.ecosystem.Ecosystem
 
@@ -23,12 +23,12 @@ abstract class FoodChainParty(
   ) extends Node {
   val id = s"$ofType-${PartyIdGenerator.getNextId()}"
 
-  // type of the previous party in the chain
+  /* type of the previous party in the chain */
   val prevPartyType: Option[String] = Ecosystem.getPreviousParty(forType = ofType)
 
   override val transactionValidationStrategy = new FoodChainValidationStrategy
 
-  private var currentTick: Int = 0
+  var currentTick: Int = 0
   val foodRepo: FoodRepository = new InMemoryFoodRepository(initialMaterials, capacity)
   var balance: Double = initialBalance
   val expectedMaterials: ListBuffer[FoodMaterial] = ListBuffer.empty[FoodMaterial]
@@ -84,7 +84,7 @@ abstract class FoodChainParty(
 
       case req: PaymentRequest =>
         if (balance < req.amount)
-          Logger.warn(s"Not enough money to pay ${req.amount.toString()}", this)
+          Logger.warn(s"Not enough money to pay ${Utils.formatPrice(req.amount)}", this)
         else if (req.payer != this)
           Utils.assertionFailed(s"Received payment request meant for someone else")
         else
@@ -131,8 +131,7 @@ abstract class FoodChainParty(
     mineBlock(time = currentTick)
   }
 
-  def applyBehaviour(behaviour: PartyBehaviour): Unit =
-    behaviour.apply(this)
+  def applyBehaviour(behaviour: PartyBehaviour): Unit = behaviour.apply(this)
 
   def getFoodMaterials(): List[FoodMaterial] = foodRepo.getAll()
 
@@ -173,9 +172,9 @@ abstract class FoodChainParty(
   }
 
   protected def makePayment(amount: Double, to: FoodChainParty): Unit = {
-    Logger.log(s"Paying ${amount.toString()} to ${to.id}", this)
+    Logger.log(s"Paying ${Utils.formatPrice(amount)} to ${to.id}", this)
     if (amount > balance)
-      Utils.assertionFailed(s"Not enough money to pay ${amount.toString()} to ${to.id}")
+      Utils.assertionFailed(s"Not enough money to pay ${Utils.formatPrice(amount)} to ${to.id}")
 
     val paymentOperation = new PaymentOperation(amount, from = this, to = to)
 

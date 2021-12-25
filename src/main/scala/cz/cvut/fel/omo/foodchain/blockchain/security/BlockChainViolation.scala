@@ -4,6 +4,7 @@ import cz.cvut.fel.omo.foodchain.blockchain.Transaction
 import cz.cvut.fel.omo.foodchain.blockchain.Node
 import cz.cvut.fel.omo.foodchain.blockchain.UtxoContent
 import cz.cvut.fel.omo.foodchain.blockchain.TransactionInput
+import cz.cvut.fel.omo.foodchain.blockchain.Block
 
 abstract class BlockChainViolation(val node: Node, val time: Long) {
   val description: String = ""
@@ -21,7 +22,13 @@ class DoubleSpendingViolation(
     s"Utxo ${txInput.utxo.content.toString()} in transaction ${tx.id}"
 }
 
-class BlockMutationViolation(node: Node, time: Long) extends BlockChainViolation(node, time)
+class BlockMutationViolation(
+    node: Node,
+    time: Long,
+    val block: Block,
+  ) extends BlockChainViolation(node, time) {
+  override val description: String = s"Mutation in block ${block.toString()}"
+}
 
 class SignatureForgeryViolation(
     node: Node,

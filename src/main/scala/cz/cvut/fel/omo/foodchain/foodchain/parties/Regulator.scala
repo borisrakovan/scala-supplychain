@@ -3,7 +3,7 @@ package cz.cvut.fel.omo.foodchain.foodchain.parties
 import cz.cvut.fel.omo.foodchain.blockchain.Network
 import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterial
-import cz.cvut.fel.omo.foodchain.common.Message
+import cz.cvut.fel.omo.foodchain.foodchain.Message
 import cz.cvut.fel.omo.foodchain.foodchain.channels.Channel
 import cz.cvut.fel.omo.foodchain.foodchain.operations.InspectionOperation
 import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterialState

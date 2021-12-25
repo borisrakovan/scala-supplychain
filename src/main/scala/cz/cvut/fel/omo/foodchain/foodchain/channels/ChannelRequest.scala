@@ -1,7 +1,7 @@
 package cz.cvut.fel.omo.foodchain.foodchain.channels
 import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterial
-import cz.cvut.fel.omo.foodchain.common.Transferable
+import cz.cvut.fel.omo.foodchain.foodchain.Transferable
 
 abstract class ChannelRequest(val channel: Channel, val sender: FoodChainParty)
     extends Transferable {

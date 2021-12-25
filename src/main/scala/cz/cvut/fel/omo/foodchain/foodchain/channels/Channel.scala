@@ -3,9 +3,9 @@ package cz.cvut.fel.omo.foodchain.foodchain.channels
 import scala.collection.mutable
 import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 import scala.util.Random
-import cz.cvut.fel.omo.foodchain.common.{ MessageQueue, Message }
+import cz.cvut.fel.omo.foodchain.foodchain.{ MessageQueue, Message }
 import cz.cvut.fel.omo.foodchain.blockchain.Node
-import cz.cvut.fel.omo.foodchain.common.Logger
+import cz.cvut.fel.omo.foodchain.Logger
 import cz.cvut.fel.omo.foodchain.utils.Utils
 
 class Channel(val name: String) extends MessageQueue {
@@ -16,9 +16,7 @@ class Channel(val name: String) extends MessageQueue {
   private val requestQueue = mutable.Queue[(ChannelRequest, FoodChainParty)]()
 
   // TODO: resend these at some point in a cycle,
-  // or at least several times per period
-  // maybe using a observer subject and suscribing to it along with
-  // simulation
+  // or at least several times per simulation
   @SuppressWarnings(Array("org.wartremover.warts.MutableDataStructures"))
   private val pendingRequests = mutable.Queue[ChannelRequest]()
 

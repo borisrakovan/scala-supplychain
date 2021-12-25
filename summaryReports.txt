@@ -1,0 +1,301 @@
+TRANSACTIONS REPORT
++---+----+-------------+----------------------------------------------------------+
+| ID|Time|    Initiator|                                                 Operation|
++---+----+-------------+----------------------------------------------------------+
+|  1|   1|     farmer-1|                                        HarvestOperation()|
+|  2|   2|     farmer-1|                                        HarvestOperation()|
+|  3|   3|     farmer-1|                                        HarvestOperation()|
+|  4|   4|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+|  5|   4|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+|  6|   4|     farmer-1|                                        HarvestOperation()|
+| 10|   5|   importer-2|       Payment(from=importer-2, to=farmer-1, amount=51.21)|
+| 11|   5|   importer-2|      Payment(from=importer-2, to=farmer-1, amount=108.73)|
+|  7|   5|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+|  8|   5|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+|  9|   5|     farmer-1|                                        HarvestOperation()|
+| 12|   5|   importer-2|                                         ImportOperation()|
+| 13|   6|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+| 14|   6|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+| 15|   6|     farmer-1|                                        HarvestOperation()|
+| 16|   6|   importer-2|       Payment(from=importer-2, to=farmer-1, amount=35.65)|
+| 17|   6|   importer-2|       Payment(from=importer-2, to=farmer-1, amount=48.66)|
+| 18|   6|   importer-2|                                         ImportOperation()|
+| 19|   7|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+| 20|   7|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+| 21|   7|     farmer-1|                                        HarvestOperation()|
+| 22|   7|   importer-2|        Payment(from=importer-2, to=farmer-1, amount=7.34)|
+| 23|   7|   importer-2|       Payment(from=importer-2, to=farmer-1, amount=81.39)|
+| 24|   7|   importer-2|                                         ImportOperation()|
+| 25|   8|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+| 26|   8|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+| 27|   8|   importer-2|       Payment(from=importer-2, to=farmer-1, amount=33.08)|
+| 28|   8|   importer-2|       Payment(from=importer-2, to=farmer-1, amount=46.09)|
+| 29|   8|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 30|   8|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 31|   8|   importer-2|                                         ImportOperation()|
+| 39|   9|  regulator-3|    Payment(from=regulator-3, to=importer-2, amount=56.33)|
+| 32|   9|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+| 33|   9|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+| 34|   9|   importer-2|       Payment(from=importer-2, to=farmer-1, amount=31.77)|
+| 35|   9|   importer-2|       Payment(from=importer-2, to=farmer-1, amount=14.61)|
+| 36|   9|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 37|   9|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 38|   9|   importer-2|                                         ImportOperation()|
+| 40|   9|  regulator-3|   Payment(from=regulator-3, to=importer-2, amount=119.60)|
+| 41|   9|  regulator-3|                                     InspectionOperation()|
+| 43|  10|   importer-2|       Payment(from=importer-2, to=farmer-1, amount=45.28)|
+| 44|  10|   importer-2|       Payment(from=importer-2, to=farmer-1, amount=36.94)|
+| 45|  10|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 42|  10|     farmer-1|                    Transfer(from=farmer-1, to=importer-2)|
+| 46|  10|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 47|  10|   importer-2|                                         ImportOperation()|
+| 48|  10|  regulator-3|    Payment(from=regulator-3, to=importer-2, amount=39.21)|
+| 49|  10|  regulator-3|    Payment(from=regulator-3, to=importer-2, amount=53.52)|
+| 50|  10|  regulator-3|                                     InspectionOperation()|
+| 51|  11|   importer-2|        Payment(from=importer-2, to=farmer-1, amount=3.82)|
+| 52|  11|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 53|  11|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 54|  11|   importer-2|                                         ImportOperation()|
+| 55|  11|  regulator-3|     Payment(from=regulator-3, to=importer-2, amount=8.07)|
+| 56|  11|  regulator-3|    Payment(from=regulator-3, to=importer-2, amount=89.52)|
+| 57|  11|  regulator-3|                                     InspectionOperation()|
+| 58|  12|  regulator-3|    Payment(from=regulator-3, to=importer-2, amount=36.38)|
+| 59|  12|  regulator-3|    Payment(from=regulator-3, to=importer-2, amount=50.69)|
+| 60|  12|  regulator-3|              Transfer(from=regulator-3, to=distributor-4)|
+| 61|  12|  regulator-3|                                     InspectionOperation()|
+| 62|  13|  regulator-3|              Transfer(from=regulator-3, to=distributor-4)|
+| 63|  13|  regulator-3|                                     InspectionOperation()|
+| 64|  13|distributor-4| Payment(from=distributor-4, to=regulator-3, amount=56.33)|
+| 65|  13|distributor-4|                        DistributionOperation(distance=77)|
+| 66|  14|  regulator-3|              Transfer(from=regulator-3, to=distributor-4)|
+| 67|  14|  regulator-3|                                     InspectionOperation()|
+| 68|  14|distributor-4|Payment(from=distributor-4, to=regulator-3, amount=119.60)|
+| 69|  14|distributor-4|                        DistributionOperation(distance=96)|
+| 70|  15|  regulator-3|              Transfer(from=regulator-3, to=distributor-4)|
+| 71|  15|  regulator-3|                                     InspectionOperation()|
+| 72|  15|distributor-4| Payment(from=distributor-4, to=regulator-3, amount=39.21)|
+| 73|  15|distributor-4|                        DistributionOperation(distance=11)|
+| 74|  16|  regulator-3|              Transfer(from=regulator-3, to=distributor-4)|
+| 75|  16|  regulator-3|                                     InspectionOperation()|
+| 76|  16|distributor-4| Payment(from=distributor-4, to=regulator-3, amount=53.52)|
+| 77|  16|distributor-4|               Transfer(from=distributor-4, to=retailer-5)|
+| 78|  16|distributor-4|                        DistributionOperation(distance=47)|
+| 79|  17|  regulator-3|              Transfer(from=regulator-3, to=distributor-4)|
+| 80|  17|distributor-4|  Payment(from=distributor-4, to=regulator-3, amount=8.07)|
+| 81|  17|distributor-4|               Transfer(from=distributor-4, to=retailer-5)|
+| 82|  17|distributor-4|                        DistributionOperation(distance=77)|
+| 83|  17|   retailer-5|  Payment(from=retailer-5, to=distributor-4, amount=89.32)|
+| 84|  17|   retailer-5|                MarketingOperation(discountPercentage=0.0)|
+| 85|  18|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 86|  18|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 87|  18|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 88|  18|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 91|  18|distributor-4| Payment(from=distributor-4, to=regulator-3, amount=89.52)|
+| 92|  18|distributor-4|               Transfer(from=distributor-4, to=retailer-5)|
+| 93|  18|distributor-4|                        DistributionOperation(distance=85)|
+| 89|  18|   importer-2|                 Transfer(from=importer-2, to=regulator-3)|
+| 90|  18|  regulator-3|              Transfer(from=regulator-3, to=distributor-4)|
+| 94|  18|   retailer-5| Payment(from=retailer-5, to=distributor-4, amount=149.60)|
+| 95|  18|   retailer-5|               MarketingOperation(discountPercentage=13.0)|
+| 96|  19|  regulator-3|    Payment(from=regulator-3, to=importer-2, amount=34.94)|
+| 97|  19|  regulator-3|    Payment(from=regulator-3, to=importer-2, amount=16.07)|
+| 98|  19|  regulator-3|    Payment(from=regulator-3, to=importer-2, amount=49.80)|
+| 99|  19|  regulator-3|    Payment(from=regulator-3, to=importer-2, amount=40.63)|
+|100|  19|  regulator-3|     Payment(from=regulator-3, to=importer-2, amount=4.20)|
+|101|  19|  regulator-3|              Transfer(from=regulator-3, to=distributor-4)|
+|102|  19|  regulator-3|                                     InspectionOperation()|
+|103|  19|distributor-4| Payment(from=distributor-4, to=regulator-3, amount=36.38)|
+|104|  19|distributor-4|               Transfer(from=distributor-4, to=retailer-5)|
+|105|  19|distributor-4|                        DistributionOperation(distance=79)|
+|106|  19|   retailer-5|  Payment(from=retailer-5, to=distributor-4, amount=77.21)|
+|107|  19|   retailer-5|               MarketingOperation(discountPercentage=28.0)|
+|109|  20|distributor-4| Payment(from=distributor-4, to=regulator-3, amount=50.69)|
+|108|  20|  regulator-3|                                     InspectionOperation()|
+|110|  20|distributor-4|               Transfer(from=distributor-4, to=retailer-5)|
+|111|  20|distributor-4|                        DistributionOperation(distance=67)|
+|112|  20|   retailer-5|  Payment(from=retailer-5, to=distributor-4, amount=79.52)|
+|113|  20|   retailer-5|                  Transfer(from=retailer-5, to=customer-6)|
+|114|  20|   retailer-5|                MarketingOperation(discountPercentage=0.0)|
+|117|  21|   retailer-5|  Payment(from=retailer-5, to=distributor-4, amount=42.06)|
+|118|  21|   retailer-5|                  Transfer(from=retailer-5, to=customer-6)|
+|120|  21|   customer-6|     Payment(from=customer-6, to=retailer-5, amount=89.32)|
+|115|  21|  regulator-3|                                     InspectionOperation()|
+|116|  21|distributor-4|               Transfer(from=distributor-4, to=retailer-5)|
+|119|  21|   retailer-5|               MarketingOperation(discountPercentage=22.0)|
+|121|  22|  regulator-3|              Transfer(from=regulator-3, to=distributor-4)|
+|122|  22|  regulator-3|                                     InspectionOperation()|
+|123|  22|distributor-4|               Transfer(from=distributor-4, to=retailer-5)|
+|124|  22|   retailer-5| Payment(from=retailer-5, to=distributor-4, amount=116.51)|
+|127|  22|   customer-6|    Payment(from=customer-6, to=retailer-5, amount=130.15)|
+|125|  22|   retailer-5|                  Transfer(from=retailer-5, to=customer-6)|
+|126|  22|   retailer-5|                MarketingOperation(discountPercentage=0.0)|
+|136|  23|   customer-6|     Payment(from=customer-6, to=retailer-5, amount=55.59)|
+|128|  23|  regulator-3|              Transfer(from=regulator-3, to=distributor-4)|
+|129|  23|  regulator-3|                                     InspectionOperation()|
+|130|  23|distributor-4| Payment(from=distributor-4, to=regulator-3, amount=34.94)|
+|131|  23|distributor-4|               Transfer(from=distributor-4, to=retailer-5)|
+|133|  23|   retailer-5|  Payment(from=retailer-5, to=distributor-4, amount=65.37)|
+|134|  23|   retailer-5|                  Transfer(from=retailer-5, to=customer-6)|
+|135|  23|   retailer-5|               MarketingOperation(discountPercentage=25.0)|
+|132|  23|distributor-4|                        DistributionOperation(distance=49)|
++---+----+-------------+----------------------------------------------------------+
+
+
+PARTIES REPORT
++-------------+--------+---------------+------------------------------------------------------------------------------------------------------+
+|        Party| Balance|Blockchain size|                                                                                        Food materials|
++-------------+--------+---------------+------------------------------------------------------------------------------------------------------+
+|     farmer-1| 1544.57|             34|                                                                                                    []|
+|   importer-2| 1054.39|             34|                                                                                                    []|
+|  regulator-3|10000.00|             34|                                                                                                    []|
+|distributor-4| 5415.92|             34|                                                                                                    []|
+|   retailer-5|19900.73|             34|                                                                                                    []|
+|   customer-6| 9084.39|             34|[tomato, strawberry, cheesse, salad, potato, cabbage, melon, egg, cucumber, pear, apple, banana, milk]|
++-------------+--------+---------------+------------------------------------------------------------------------------------------------------+
+
+
+MATERIALS REPORT
++-------------+--------------------------------------------+----+
+|        Party|                                   Operation|Time|
++-------------+--------------------------------------------+----+
+|             |                                            |    |
+|        APPLE|                                            |    |
+|     farmer-1|                          HarvestOperation()|   6|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   9|
+|   importer-2|                           ImportOperation()|  10|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|  18|
+|  regulator-3|                       InspectionOperation()|  21|
+|             |                                            |    |
+|         PEAR|                                            |    |
+|     farmer-1|                          HarvestOperation()|   5|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   8|
+|   importer-2|                           ImportOperation()|   9|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|  18|
+|  regulator-3|                       InspectionOperation()|  20|
+|  regulator-3|Transfer(from=regulator-3, to=distributor-4)|  23|
+|             |                                            |    |
+|        MELON|                                            |    |
+|     farmer-1|                          HarvestOperation()|   4|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   7|
+|   importer-2|                           ImportOperation()|   8|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|  11|
+|  regulator-3|                       InspectionOperation()|  15|
+|  regulator-3|Transfer(from=regulator-3, to=distributor-4)|  18|
+|distributor-4|          DistributionOperation(distance=79)|  19|
+|distributor-4| Transfer(from=distributor-4, to=retailer-5)|  22|
+|   retailer-5| MarketingOperation(discountPercentage=25.0)|  23|
+|             |                                            |    |
+|   STRAWBERRY|                                            |    |
+|     farmer-1|                          HarvestOperation()|   1|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   4|
+|   importer-2|                           ImportOperation()|   5|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|   8|
+|  regulator-3|                       InspectionOperation()|  10|
+|  regulator-3|Transfer(from=regulator-3, to=distributor-4)|  13|
+|distributor-4|          DistributionOperation(distance=96)|  14|
+|distributor-4| Transfer(from=distributor-4, to=retailer-5)|  17|
+|   retailer-5| MarketingOperation(discountPercentage=13.0)|  18|
+|   retailer-5|    Transfer(from=retailer-5, to=customer-6)|  21|
+|             |                                            |    |
+|       BANANA|                                            |    |
+|     farmer-1|                          HarvestOperation()|   6|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   9|
+|   importer-2|                           ImportOperation()|  10|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|  18|
+|  regulator-3|                       InspectionOperation()|  22|
+|             |                                            |    |
+|       TOMATO|                                            |    |
+|     farmer-1|                          HarvestOperation()|   1|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   4|
+|   importer-2|                           ImportOperation()|   5|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|   8|
+|  regulator-3|                       InspectionOperation()|   9|
+|  regulator-3|Transfer(from=regulator-3, to=distributor-4)|  12|
+|distributor-4|          DistributionOperation(distance=77)|  13|
+|distributor-4| Transfer(from=distributor-4, to=retailer-5)|  16|
+|   retailer-5|  MarketingOperation(discountPercentage=0.0)|  17|
+|   retailer-5|    Transfer(from=retailer-5, to=customer-6)|  20|
+|             |                                            |    |
+|       POTATO|                                            |    |
+|     farmer-1|                          HarvestOperation()|   3|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   6|
+|   importer-2|                           ImportOperation()|   7|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|  10|
+|  regulator-3|                       InspectionOperation()|  13|
+|  regulator-3|Transfer(from=regulator-3, to=distributor-4)|  16|
+|distributor-4|          DistributionOperation(distance=77)|  17|
+|distributor-4| Transfer(from=distributor-4, to=retailer-5)|  20|
+|   retailer-5| MarketingOperation(discountPercentage=22.0)|  21|
+|             |                                            |    |
+|     CUCUMBER|                                            |    |
+|     farmer-1|                          HarvestOperation()|   5|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   8|
+|   importer-2|                           ImportOperation()|   9|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|  18|
+|  regulator-3|                       InspectionOperation()|  19|
+|  regulator-3|Transfer(from=regulator-3, to=distributor-4)|  22|
+|distributor-4|          DistributionOperation(distance=49)|  23|
+|             |                                            |    |
+|        SALAD|                                            |    |
+|     farmer-1|                          HarvestOperation()|   2|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   5|
+|   importer-2|                           ImportOperation()|   6|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|   9|
+|  regulator-3|                       InspectionOperation()|  12|
+|  regulator-3|Transfer(from=regulator-3, to=distributor-4)|  15|
+|distributor-4|          DistributionOperation(distance=47)|  16|
+|distributor-4| Transfer(from=distributor-4, to=retailer-5)|  19|
+|   retailer-5|  MarketingOperation(discountPercentage=0.0)|  20|
+|   retailer-5|    Transfer(from=retailer-5, to=customer-6)|  23|
+|             |                                            |    |
+|      CABBAGE|                                            |    |
+|     farmer-1|                          HarvestOperation()|   3|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   6|
+|   importer-2|                           ImportOperation()|   7|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|  10|
+|  regulator-3|                       InspectionOperation()|  14|
+|  regulator-3|Transfer(from=regulator-3, to=distributor-4)|  17|
+|distributor-4|          DistributionOperation(distance=85)|  18|
+|distributor-4| Transfer(from=distributor-4, to=retailer-5)|  21|
+|   retailer-5|  MarketingOperation(discountPercentage=0.0)|  22|
+|             |                                            |    |
+|          EGG|                                            |    |
+|     farmer-1|                          HarvestOperation()|   4|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   7|
+|   importer-2|                           ImportOperation()|   8|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|  11|
+|  regulator-3|                       InspectionOperation()|  16|
+|  regulator-3|Transfer(from=regulator-3, to=distributor-4)|  19|
+|distributor-4|          DistributionOperation(distance=67)|  20|
+|distributor-4| Transfer(from=distributor-4, to=retailer-5)|  23|
+|             |                                            |    |
+|         MILK|                                            |    |
+|     farmer-1|                          HarvestOperation()|   7|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|  10|
+|   importer-2|                           ImportOperation()|  11|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|  18|
+|  regulator-3|                       InspectionOperation()|  23|
+|             |                                            |    |
+|      CHEESSE|                                            |    |
+|     farmer-1|                          HarvestOperation()|   2|
+|     farmer-1|      Transfer(from=farmer-1, to=importer-2)|   5|
+|   importer-2|                           ImportOperation()|   6|
+|   importer-2|   Transfer(from=importer-2, to=regulator-3)|   9|
+|  regulator-3|                       InspectionOperation()|  11|
+|  regulator-3|Transfer(from=regulator-3, to=distributor-4)|  14|
+|distributor-4|          DistributionOperation(distance=11)|  15|
+|distributor-4| Transfer(from=distributor-4, to=retailer-5)|  18|
+|   retailer-5| MarketingOperation(discountPercentage=28.0)|  19|
+|   retailer-5|    Transfer(from=retailer-5, to=customer-6)|  22|
++-------------+--------------------------------------------+----+
+
+
+SECURITY REPORT
++-----------+-----------------------+---------------------------------------------------------+----+
+|      Party|              Violation|                                              Description|Time|
++-----------+-----------------------+---------------------------------------------------------+----+
+|regulator-3|DoubleSpendingViolation|Utxo Money(id=utxo_41, amount=9943.67) in transaction 155|  26|
+|regulator-3|DoubleSpendingViolation|Utxo Money(id=utxo_59, amount=9597.37) in transaction 185|  59|
+|regulator-3|DoubleSpendingViolation|   Utxo Money(id=utxo_70, amount=8.07) in transaction 186|  83|
+|regulator-3| BlockMutationViolation|                            Mutation in block Block(5c21)|  87|
++-----------+-----------------------+---------------------------------------------------------+----+

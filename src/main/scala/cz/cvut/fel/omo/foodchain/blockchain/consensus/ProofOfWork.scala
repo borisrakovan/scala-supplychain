@@ -3,14 +3,37 @@ package cz.cvut.fel.omo.foodchain.blockchain.consensus
 import cz.cvut.fel.omo.foodchain.utils.Crypto
 import cz.cvut.fel.omo.foodchain.blockchain.Transaction
 import cz.cvut.fel.omo.foodchain.blockchain.UtxoContent
-import cz.cvut.fel.omo.foodchain.ecosystem.EcosystemConfig
+import cz.cvut.fel.omo.foodchain.Config
 import cz.cvut.fel.omo.foodchain.blockchain.Network
 import scala.util.Random
 
 object ProofOfWork {
-  val Difficulty: Int = 2
-}
+  def makeDescriptor(
+      lastHast: String,
+      transactions: List[Transaction[UtxoContent]],
+      proof: Long,
+    ): String = {
+    val txHash = transactions.map(_.hashCode()).mkString(":")
+    s"${lastHast}:${txHash}:${proof.toString()}"
+  }
 
+  def validateProof(
+      lastHash: String,
+      transactions: List[Transaction[UtxoContent]],
+      proof: Long,
+    ): Option[String] = {
+    val descriptor = ProofOfWork.makeDescriptor(lastHash, transactions, proof)
+    val guess = Crypto.sha256Hash(descriptor)
+
+    if (
+        (guess.take(Config.ProofOfWorkDifficulty)
+          == "0".repeat(Config.ProofOfWorkDifficulty))
+    )
+      Some(guess)
+    else
+      None
+  }
+}
 class ProofOfWork(val network: Network) {
   private val random: Random = new Random
 
@@ -28,8 +51,8 @@ class ProofOfWork(val network: Network) {
         .math
         .pow(
           16,
-          ProofOfWork.Difficulty,
-        ) / (EcosystemConfig.AverageMineSuccessPeriod * numParticipants)).toInt
+          Config.ProofOfWorkDifficulty,
+        ) / (Config.AverageMineSuccessPeriod * numParticipants)).toInt
 
     @scala.annotation.tailrec
     def powHelper(i: Int): Option[(String, Long)] =
@@ -37,35 +60,12 @@ class ProofOfWork(val network: Network) {
         None
       else {
         val nonce = random.nextInt()
-        validateProof(lastHash, transactions, proof = nonce) match {
+        ProofOfWork.validateProof(lastHash, transactions, proof = nonce) match {
           case Some(hash) => Some((hash, nonce))
           case None => powHelper(i + 1)
         }
       }
 
     powHelper(0)
-  }
-
-  def validateProof(
-      lastHash: String,
-      transactions: List[Transaction[UtxoContent]],
-      proof: Long,
-    ): Option[String] = {
-    val descriptor = makeDescriptor(lastHash, transactions, proof)
-    val guess = Crypto.sha256Hash(descriptor)
-
-    if ((guess take ProofOfWork.Difficulty) == "0".repeat(ProofOfWork.Difficulty))
-      Some(guess)
-    else
-      None
-  }
-
-  private def makeDescriptor(
-      lastHast: String,
-      transactions: List[Transaction[UtxoContent]],
-      proof: Long,
-    ): String = {
-    val txHash = transactions.map(_.hashCode()).mkString(":")
-    s"${lastHast}:${txHash}:${proof.toString()}"
   }
 }

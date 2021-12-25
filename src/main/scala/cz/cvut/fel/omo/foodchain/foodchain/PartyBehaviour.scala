@@ -1,24 +1,30 @@
 package cz.cvut.fel.omo.foodchain.foodchain
 
 import scala.math.random
-import cz.cvut.fel.omo.foodchain.common.Logger
+import cz.cvut.fel.omo.foodchain.Logger
 import cz.cvut.fel.omo.foodchain.foodchain.transactions.MoneyTransaction
 import cz.cvut.fel.omo.foodchain.blockchain.BlockChain
+import cz.cvut.fel.omo.foodchain.Config
+import cz.cvut.fel.omo.foodchain.blockchain.Block
 
 trait PartyBehaviour {
   def apply(party: FoodChainParty): Unit
 }
 
-class HostileBehaviour(
-    val doubleSpendProba: Double,
-    val blockMutationProba: Double,
-  ) extends PartyBehaviour {
+class HostileBehaviour extends PartyBehaviour {
+  private val doubleSpendProba =
+    Config.DoubleSpendPeriodProbability
+
+  private val blockMutationProba = Config.BlockMutationProbability
   def apply(party: FoodChainParty): Unit = {
 
     if (random() <= doubleSpendProba)
       applyDoubleSpend(party)
 
-    if (random() <= blockMutationProba)
+    if (
+        party.currentTick == Config.NumSimulationSteps
+        && random() <= blockMutationProba
+    )
       applyMutation(party)
   }
 
@@ -40,10 +46,23 @@ class HostileBehaviour(
     }
   }
 
-  private def applyMutation(party: FoodChainParty): Unit =
+  private def applyMutation(party: FoodChainParty): Unit = {
     // try removing some transaction from the block
+    Logger.warn(s"Trying to mutate the blockchain", party)
     party.blockChain.history.lastOption match {
-      case Some(block) => party.blockChain = new BlockChain(party.blockChain.history.dropRight(1))
+      case Some(_) =>
+        val oldBlock = party.blockChain.history.last
+        val newBlock = new Block(
+          prevBlockHash = oldBlock.prevBlockHash,
+          nonce = oldBlock.nonce,
+          hash = oldBlock.hash,
+          time = oldBlock.time,
+          transactions = oldBlock.transactions.dropRight(1),
+        )
+
+        party.blockChain = new BlockChain(party.blockChain.history.dropRight(1) :+ newBlock)
+
       case None =>
     }
+  }
 }

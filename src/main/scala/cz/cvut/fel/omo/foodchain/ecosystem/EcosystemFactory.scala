@@ -7,7 +7,6 @@ import cz.cvut.fel.omo.foodchain.foodchain.parties.Farmer
 import cz.cvut.fel.omo.foodchain.foodchain.parties.Regulator
 import cz.cvut.fel.omo.foodchain.foodchain.parties.Distributor
 import cz.cvut.fel.omo.foodchain.foodchain.parties.Customer
-import cz.cvut.fel.omo.foodchain.foodchain.{ EcosystemNetworkImpl, EcosystemNetwork }
 import cz.cvut.fel.omo.foodchain.blockchain.Utxo
 import cz.cvut.fel.omo.foodchain.foodchain.Money
 import cz.cvut.fel.omo.foodchain.foodchain.parties.Importer
@@ -85,11 +84,11 @@ class ConcreteEcosystemFactory extends EcosystemFactory {
       new FoodMaterial("egg", r()),
       new FoodMaterial("milk", r()),
       new FoodMaterial("cheesse", r()),
-      new FoodMaterial("suggar", r()),
-      new FoodMaterial("salt", r()),
-      new FoodMaterial("chocolate", r()),
-      new FoodMaterial("apple pie", r()),
-      new FoodMaterial("fries", r()),
+      // new FoodMaterial("suggar", r()),
+      // new FoodMaterial("salt", r()),
+      // new FoodMaterial("chocolate", r()),
+      // new FoodMaterial("apple pie", r()),
+      // new FoodMaterial("fries", r()),
     )
   }
 }

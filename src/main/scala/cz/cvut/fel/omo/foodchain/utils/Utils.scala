@@ -1,7 +1,7 @@
 package cz.cvut.fel.omo.foodchain.utils
 
-import cz.cvut.fel.omo.foodchain.ecosystem.EcosystemConfig
-import cz.cvut.fel.omo.foodchain.common.Logger
+import cz.cvut.fel.omo.foodchain.Config
+import cz.cvut.fel.omo.foodchain.Logger
 
 object Utils {
   def round2(n: Double): Double = n - (n % 0.01)
@@ -11,7 +11,7 @@ object Utils {
     min + (math.random() * (max - min))
 
   def assertionFailed(reason: String, forceError: Boolean = false): Unit =
-    if (EcosystemConfig.Debug || forceError)
+    if (Config.Debug || forceError)
       throw new RuntimeException(reason)
     else
       Logger.error(reason)

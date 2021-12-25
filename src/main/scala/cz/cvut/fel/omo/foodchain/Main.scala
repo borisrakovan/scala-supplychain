@@ -5,8 +5,8 @@ import ecosystem.EcosystemSimulation
 import cz.cvut.fel.omo.foodchain.ecosystem.ConcreteEcosystemFactory
 import cz.cvut.fel.omo.foodchain.ecosystem.EcosystemFactory
 import cz.cvut.fel.omo.foodchain.ecosystem.Ecosystem
-import cz.cvut.fel.omo.foodchain.ui.CommandLineInterface
-import cz.cvut.fel.omo.foodchain.ui.UserInterface
+import cz.cvut.fel.omo.foodchain.CommandLineInterface
+import cz.cvut.fel.omo.foodchain.UserInterface
 
 object Main extends App {
   val fac: EcosystemFactory = new ConcreteEcosystemFactory

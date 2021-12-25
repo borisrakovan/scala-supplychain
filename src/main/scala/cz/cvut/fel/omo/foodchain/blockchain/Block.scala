@@ -1,6 +1,6 @@
 package cz.cvut.fel.omo.foodchain.blockchain
 
-import cz.cvut.fel.omo.foodchain.common.Transferable
+import cz.cvut.fel.omo.foodchain.foodchain.Transferable
 
 class Block(
     val prevBlockHash: String,

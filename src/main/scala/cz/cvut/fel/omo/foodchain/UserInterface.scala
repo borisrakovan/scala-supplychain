@@ -1,4 +1,4 @@
-package cz.cvut.fel.omo.foodchain.ui
+package cz.cvut.fel.omo.foodchain
 
 import cz.cvut.fel.omo.foodchain.utils.Tabulator
 import cz.cvut.fel.omo.foodchain.reports.Report

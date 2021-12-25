@@ -1,4 +1,4 @@
-package cz.cvut.fel.omo.foodchain.common
+package cz.cvut.fel.omo.foodchain.foodchain
 
 import cz.cvut.fel.omo.foodchain.blockchain.Node
 

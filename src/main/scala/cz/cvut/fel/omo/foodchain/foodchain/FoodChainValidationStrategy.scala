@@ -12,6 +12,7 @@ class FoodChainValidationStrategy extends TransactionValidationStrategy {
       tx: FoodTransaction
     ): Boolean = {
     val inputContents = tx.inputs.map(_.utxo.content.id)
+    // If the outputs contain an UTXO that is not in the inputs, return an error.
     tx.outputs
       .find { utxo =>
         !inputContents.contains(utxo.content.id)
@@ -22,6 +23,7 @@ class FoodChainValidationStrategy extends TransactionValidationStrategy {
   private def validateMoneyTransaction(
       tx: MoneyTransaction
     ): Boolean = {
+    // If the sum of the denominations of all input UTXO is less than the sum of the denominations of all output UTXO, return an error.
     val inputAmount: Double = tx.inputs.map(_.utxo.content.amount).sum
     val outputAmount: Double = tx.outputs.map(_.content.amount).sum
 

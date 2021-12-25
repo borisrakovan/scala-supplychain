@@ -1,7 +1,7 @@
-package cz.cvut.fel.omo.foodchain.foodchain
+package cz.cvut.fel.omo.foodchain.ecosystem
 
 import scala.collection.mutable
-import cz.cvut.fel.omo.foodchain.common.{ Message, MessageQueue, Transferable }
+import cz.cvut.fel.omo.foodchain.foodchain.{ Message, MessageQueue, Transferable }
 import cz.cvut.fel.omo.foodchain.blockchain.Node
 import cz.cvut.fel.omo.foodchain.blockchain.Network
 

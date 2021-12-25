@@ -1,7 +1,7 @@
 package cz.cvut.fel.omo.foodchain.blockchain.security
 
 import scala.collection.mutable.ListBuffer
-import cz.cvut.fel.omo.foodchain.common.Logger
+import cz.cvut.fel.omo.foodchain.Logger
 
 trait SecurityLog {
   def report(violation: BlockChainViolation): Unit

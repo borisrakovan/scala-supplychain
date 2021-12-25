@@ -1,4 +1,4 @@
-package cz.cvut.fel.omo.foodchain.common
+package cz.cvut.fel.omo.foodchain
 
 trait LogSource {
   val id: String
@@ -17,6 +17,7 @@ object Logger {
     ): Unit = {
     val src = if (source != null) s"<${source.id}> " else ""
     println(s"[${level.color + level.name + Console.RESET}] $src$msg")
+    println(s"[${level.name}] $src$msg")
   }
 
   def info(msg: String, source: LogSource = null): Unit =

@@ -3,8 +3,8 @@ package cz.cvut.fel.omo.foodchain.ecosystem
 import cz.cvut.fel.omo.foodchain.foodchain.FoodChainParty
 import cz.cvut.fel.omo.foodchain.foodchain.channels.Channel
 import cz.cvut.fel.omo.foodchain.foodchain.FoodMaterial
-import cz.cvut.fel.omo.foodchain.foodchain.EcosystemNetwork
 import cz.cvut.fel.omo.foodchain.utils.Utils
+import cz.cvut.fel.omo.foodchain.Config
 
 object Ecosystem {
   val FoodChain: List[String] =
@@ -39,7 +39,7 @@ class Ecosystem(
   }
 
   def getHostileParty(): Option[FoodChainParty] =
-    EcosystemConfig.HostileNode match {
+    Config.HostileNode match {
       case Some(pid) => parties.find(_.id.startsWith(pid))
       case None => None
     }
